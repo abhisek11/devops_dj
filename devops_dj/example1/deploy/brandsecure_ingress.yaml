@@ -1,0 +1,23 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: brandsecure-backend-dev-ingress
+  namespace: secureyourinbox
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    kubernetes.io/tls-acme: "true"
+    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+spec:
+  tls:
+  - hosts:
+    - backend.dev.secureyourinbox.net
+    secretName: brandsecure-backend-dev-ingress-tls
+  rules:
+  - host: backend.dev.secureyourinbox.net
+    http:
+      paths:
+      - backend:
+          serviceName: brandsecure-backend
+          servicePort: 8000
+        path: /

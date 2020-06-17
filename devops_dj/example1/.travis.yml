@@ -1,0 +1,35 @@
+sudo: required
+language: python
+python:
+  - '3.7'
+services:
+  - docker
+env:
+  global:
+    DOCKER_USERNAME=$DOCKER_USERNAME
+    DOCKER_PASSWORD=$DOCKER_PASSWORD
+
+before_script: pip install docker-compose
+
+script:
+  - docker-compose run --rm brandsecure-backend sh -c "
+                                      python manage.py test && flake8"
+#  - docker build -t secureyourinbox/brandsecure .
+  
+#after_success:
+#  - if [ "$TRAVIS_BRANCH" == "master" ]; then
+#    docker login -u $DOCKER_USER -p $DOCKER_PASSWORD;
+#    docker push secureyourinbox/brandsecure;
+#    fi  
+  
+notifications:
+  slack:
+    rooms:
+      secure: aRwAOkVYIjCTAOODlzf0g/FVpSgO4wDCgfZcHxsKpRD2jwKeDhMy28YMYQXiGHBbj1BWRqcoUGad7SGOsddKm0GXICYXU/3qlGEQb7bOdie9xtHa3TGjoGCWMiGGAXZFKG8AUta8omfy+tc+90+ANekA7okkuPJO7YEODGewmQHEiCIdR66zFCdceopXG14NnF1A+dnRsJR1Fx7Q26dzH5cOfSXZ6UbCgiJPkZ+OA5/T+PsEOPCRC3hzAXSfPrIWKygYJS5FpUz8i2f0LN++7TiY4fpmTx9cMAUiVH5VBhR4d1EvU9now5/Yx3RP0/IJLA+zGS+YxXa3yrPFdgj+wG7uOhJW655D6XsEHLNg6V4PpjkI06m0zgXew/X2vxya1rMEkcYt5BTu6mUiDaTjaljlJj8UAIJlEcInup0f/oRW1Vgiw48jrMg/KskZ4hWu0yN4jJD4tXB33QdvuhsbS/7xL7mqySZcm6OJdRFsy9F3l4DiN7eFxC8Zdnw2Zn9GcKNq9dGFD9s0UWD+pdtMDNtbwdkkRzHeRj3/u0rF5q2VOwf1WeLgk2autIpuyUaTNYuHQT2khDHXgm4xy8zPBccDDlRPaJSf2BF5Anya6YPrXZWnJNS5csA4rNpJ8hZW43UOUCOywVISRNMdrwce8I20Nov/tSS76qBysyJ8y7k=
+    on_success: always
+    on_failure: always
+    template:
+      - Repo `%{repository_slug}` *%{result}* build (<%{build_url}|#%{build_number}>)
+        for commit (<%{compare_url}|%{commit}>) on branch `%{branch}`.
+      - 'Execution time: *%{duration}*'
+      - 'Message: %{message}'

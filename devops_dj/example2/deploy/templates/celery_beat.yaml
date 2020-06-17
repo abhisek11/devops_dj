@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: brandsecure-celery-beat
+  namespace: secureyourinbox
+  labels:
+    app: brandsecure-celery-beat
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: brandsecure-celery-beat
+  template:
+    metadata:
+      labels:
+        app: brandsecure-celery-beat
+    spec:
+      imagePullSecrets:
+      - name: dockerhub 
+      containers:
+      - name: brandsecure-celery-beat
+        image: secureyourinbox/brandsecure-backend:{{IMAGE_VERSION}}
+        command: ["celery", "-A", "app", "beat", "-l", "info"]
+        imagePullPolicy: Always
+        env:
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: brandsecure-backend-secrets
+              key: DB_USER
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+             name: brandsecure-backend-secrets
+             key: DB_PASSWORD
+        - name: SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+             name: brandsecure-backend-secrets
+             key: SECRET_KEY
+        - name: SENDGRID_API_KEY
+          valueFrom:
+            secretKeyRef:
+             name: brandsecure-backend-secrets
+             key: SENDGRID_API_KEY
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: brandsecure-backend-configmap
+              key: DB_HOST
+        - name: DB_PORT 
+          valueFrom:
+            configMapKeyRef:
+              name: brandsecure-backend-configmap
+              key: DB_PORT
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: brandsecure-backend-configmap
+              key: DB_NAME
+        - name: DEBUG
+          valueFrom:
+            configMapKeyRef:
+              name: brandsecure-backend-configmap
+              key: DEBUG
+        - name: DJANGO_ALLOWED_HOSTS
+          valueFrom:
+            configMapKeyRef:
+              name: brandsecure-backend-configmap
+              key: DJANGO_ALLOWED_HOSTS
+        - name: DB_ENGINE
+          valueFrom:
+            configMapKeyRef:
+              name: brandsecure-backend-configmap           
+              key: DB_ENGINE
+        - name: CELERY_BROKER_URL
+          valueFrom:
+            configMapKeyRef:
+              name: brandsecure-backend-configmap
+              key: CELERY_BROKER_URL
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "256Mi"
+          limits:
+            cpu: "200m"
+            memory: "1024Mi"

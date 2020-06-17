@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: redisbroker
+  namespace: secureyourinbox
+  labels:
+    app: redisbroker
+spec:
+  ports:
+  - port: 6379
+    targetPort: 6379
+  selector:
+    app: redisbroker
+---
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+kind: Deployment
+metadata:
+  name: "redisbroker"
+  namespace: secureyourinbox
+spec:
+  selector:
+    matchLabels:
+      app: "redisbroker"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: "redisbroker"
+    spec:
+      containers:
+      - name: master
+        image: redis:6.0.3-alpine
+        resources:
+          requests:
+            cpu: 100m
+            memory: 200Mi
+        ports:
+        - containerPort: 6379
+        imagePullPolicy: IfNotPresent

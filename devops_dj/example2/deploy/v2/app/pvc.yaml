@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: brandsecure-pvc
+  namespace: secureyourinbox
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: bs-sc
+  resources:
+    requests:
+      storage: 5Gi

@@ -1,0 +1,113 @@
+version: "3"
+
+services:
+  brandsecure-backend:
+    build:
+      context: .
+    # command: gunicorn --bind 0.0.0.0:8000 app.wsgi:application
+    command: python manage.py runserver 0.0.0.0:8000
+    image: brandsecure-backend
+    expose:
+      - 8000
+    volumes:
+      - ./app:/app
+      - static_volume:/app/static
+      - media_volume:/app/media
+    env_file:
+      - ./.env
+    networks:
+      - nginx_network
+      - database_network
+      - redis_network
+      - rabbitmq_network
+    depends_on:
+      - db
+  db:
+    image: postgres:12.3
+    env_file:
+      - ./.env.db
+    networks:
+      - database_network
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  rabbitmq:
+    hostname: rabbitmq
+    image: rabbitmq:3.8.3-alpine
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=mypass
+    ports:
+      - "5672:5672"
+    networks:
+      - rabbitmq_network
+  
+  redis:
+    image: redis:6.0.3-alpine
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - redis_network
+    
+
+  celery_worker:
+    build: .
+    command: celery -A app worker -l info
+    env_file:
+      - ./.env
+    links:
+      - db
+      - redis
+    depends_on:
+      - db
+      - brandsecure-backend
+      - redis
+    networks:
+      - database_network
+      - redis_network
+      # - rabbitmq_network
+
+  celery_beat:
+    build: .
+    command: celery -A app beat -l info
+    env_file:
+      - ./.env
+    links:
+      - db
+      - redis
+    depends_on:
+      - db
+      - brandsecure-backend
+      - redis
+    networks:
+      - database_network
+      - redis_network
+      # - rabbitmq_network
+
+  nginx:
+    build: ./nginx
+    volumes:
+      - static_volume:/app/static
+      - media_volume:/app/media
+    ports:
+      - 8089:80
+    depends_on:
+      - brandsecure-backend
+    networks:
+      - nginx_network
+
+networks:
+  nginx_network:
+    driver: bridge
+  database_network:
+    driver: bridge
+  redis_network:
+    driver: bridge
+  rabbitmq_network:
+    driver: bridge
+  
+volumes:
+  db_data:
+  static_volume:
+  media_volume:
