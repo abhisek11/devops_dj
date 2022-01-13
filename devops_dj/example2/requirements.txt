@@ -5,7 +5,7 @@ psycopg2_binary==2.8.5
 django-rest-knox>=4.0,<=4.1.0
 gunicorn==20.0.4
 xmltodict==0.12.0
-Pillow==7.1.2
+Pillow==9.0.0
 dnspython3==1.15.0
 requests>=2.20
 sentry-sdk==0.14.3
